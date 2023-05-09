@@ -18,7 +18,7 @@ class UserService {
       const hashPassword = await bcrypt.hash(password, 5)
       const activationLink = v4()
       const user = await userModel.create({email, password: hashPassword, activationLink})
-      await mailService.sendActivationMail(email, activationLink)
+      await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activation/${activationLink}`)
       
       const userDto = new UserDto(user)
       const tokens = tokenService.generateToken({...userDto})
@@ -26,6 +26,27 @@ class UserService {
 
       return {user: userDto, ...tokens}
       
+   }
+
+   async login(email, password) {
+      
+      const user = await userModel.findOne({email})
+      
+      if(!user){
+         throw new Error(`Пользователя с почтой ${email} не существует или аккаунт не активирован`)
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password)
+
+      if(!isValidPassword){
+         throw new Error("Неверный пароль")
+      }
+
+      const userDto = new UserDto(user)
+      const tokens = tokenService.generateToken({...userDto})
+      await tokenService.saveToken(userDto.id, tokens.refreshToken)
+
+      return {user: userDto, ...tokens}
    }
 
 }
