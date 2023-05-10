@@ -7,7 +7,7 @@ import tokenService from './token-service.js'
 
 class UserService {
 
-   async registration(email, password) {
+   async registration(email, password){
 
       const candidate = await userModel.findOne({email})
       
@@ -28,7 +28,7 @@ class UserService {
       
    }
 
-   async login(email, password) {
+   async login(email, password){
       
       const user = await userModel.findOne({email})
       
@@ -47,6 +47,54 @@ class UserService {
       await tokenService.saveToken(userDto.id, tokens.refreshToken)
 
       return {user: userDto, ...tokens}
+
+   }
+
+   async activalion(link){
+
+      const user = await userModel.findOne({activationLink: link})
+
+      if(!user){
+         throw new Error('Некорректная ссылка')
+      }
+
+      user.isActivated = true
+      await user.save()
+
+   }
+
+   async logout(refreshToken){
+
+      return await tokenService.removeToken(refreshToken)
+
+   }
+
+   async refresh(refreshToken){
+
+      if(!refreshToken){
+         throw new Error('Вы не авторизованы')
+      }
+
+      const userData = tokenService.verifyRefreshToken(refreshToken)
+      const tokenFromDB = await tokenService.findRefreshToken(refreshToken)
+   
+      if(!userData || !tokenFromDB){
+         throw new Error('Вы не авторизованы')
+      }
+
+      const user = await userModel.findById(userData.id)
+
+      const userDto = new UserDto(user)
+      const tokens = tokenService.generateToken({...userDto})
+      await tokenService.saveToken(userDto.id, tokens.refreshToken)
+
+      return {user: userDto, ...tokens}
+
+   }
+
+   async getAllusers(){
+      const users = await userModel.find()
+      return users
    }
 
 }
