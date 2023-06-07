@@ -6,7 +6,7 @@ function isAdminRoleMiddleware(req, _res, next) {
    const isAdmin = roles.find(role => role === "ADMIN")
          
    if(!isAdmin){
-      throw new ApiError(403, 'Нет доступа')
+      throw ApiError.ForbiddenError()
    }
 
    next()

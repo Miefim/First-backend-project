@@ -26,6 +26,12 @@ class ApiError extends Error {
       
    }
 
+   static ForbiddenError(message, errors = []){
+
+      return new ApiError(403, message ? message : 'Нет доступа', errors)
+      
+   }
+
 }
 
 export default ApiError

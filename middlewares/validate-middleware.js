@@ -12,7 +12,7 @@ export function questionnaireValidation(req, res, next) {
 
    const { firstName, weight, height, sex } = req.body
 
-   if(!firstName.trim()) {
+   if(!firstName?.trim()) {
       throw ApiError.BadRequest('Введите имя')
    }
    if(!sex) {
@@ -34,3 +34,11 @@ export function questionnaireValidation(req, res, next) {
    next()
 
 }
+
+export const symptomValidation = [
+   
+   body('localization').notEmpty(),
+   body('description').notEmpty(),
+   body('isActive').isBoolean()
+   
+]

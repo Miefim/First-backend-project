@@ -19,6 +19,18 @@ class QuestionnaireService {
       return questionnaireData
 
    }
+   
+   async getQuestionnaire(userId) {
+
+      const questionnaire = await questionnaireModel.findOne({userId})
+
+      if(!questionnaire) {
+         throw ApiError.BadRequest('Анкеты не существует') 
+      }
+
+      return questionnaire
+
+   }
 
    async updateQuestionnaire(userId, data) {
 
@@ -30,13 +42,35 @@ class QuestionnaireService {
 
       const { firstName, sex, dateOfBirth, weight, height } = data
 
-      questionnaire.firstName = firstName ? firstName : ''
-      questionnaire.sex = sex ? sex : ''
-      questionnaire.dateOfBirth = dateOfBirth ? dateOfBirth : ''
-      questionnaire.weight = weight ? weight : ''
-      questionnaire.height = height ? height : ''
+      firstName ? questionnaire.firstName = firstName : ''
+      sex ? questionnaire.sex = sex : ''
+      dateOfBirth ? questionnaire.dateOfBirth = dateOfBirth : ''
+      weight ? questionnaire.weight = weight : ''
+      height ? questionnaire.height = height : ''
 
       return await questionnaire.save()
+
+   }
+
+   async removeQuestionnaire(userId) {
+
+      const questionnaire = await questionnaireModel.findOne({userId})
+
+      if(!questionnaire) {
+         throw ApiError.BadRequest('Анкеты не существует') 
+      }
+
+      await questionnaireModel.deleteOne(questionnaire)
+
+      return {removeQuestionnaire: true}
+
+   }
+
+   async getQuestionnaires() {
+
+      const questionnaires = await questionnaireModel.find()
+
+      return questionnaires
 
    }
 
