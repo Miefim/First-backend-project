@@ -6,6 +6,7 @@ import questionnaireController from '../controllers/questionnaire-controller.js'
 import symptomController from '../controllers/symptomController.js'
 import authMiddleware from '../middlewares/auth-middleware.js'
 import adminRoleMiddleware from '../middlewares/isAdminRole-middleware.js'
+import consultationController from '../controllers/consultation-controller.js'
 
 const router = new Router()
 
@@ -28,5 +29,9 @@ router.put('/symptom/update', authMiddleware, symptomValidation, symptomControll
 router.delete('/symptom', authMiddleware, symptomController.removeSymptom)
 router.get('/symptoms', authMiddleware, symptomController.getSymptoms)
 router.delete('/symptoms', authMiddleware, symptomController.removeSymptoms)
+
+router.post('/consultation/create', authMiddleware, consultationController.createConsultation)
+router.get('/consultation', authMiddleware, consultationController.getConsultation)
+router.delete('/consultation', authMiddleware, consultationController.removeConsultation)
 
 export default router
