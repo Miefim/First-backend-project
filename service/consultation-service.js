@@ -1,50 +1,53 @@
-import symptomModel from "../models/symptom-model.js"
-import consultationModel from "../models/consultalion-model.js"
+import SymptomModel from "../models/symptom-model.js"
+import ConsultationModel from "../models/consultation-model.js"
 import ApiError from "../exceptions/api-error.js"
-import isEmptyObj from "../utils/isEmptyObj.js"
+import SymptomDto from "../dto/symptom-dto.js"
+import ConsultationDto from "../dto/consultation-dto.js"
 
 class ConsultationService {
 
-   async createConsultation(user) {
-      const userId = user.id
-      const symptoms = await symptomModel.find({userId, isActive: true})
+   async createConsultation(userId) {
+
+      const symptoms = await SymptomModel.find({userId, isDeleted: false})
 
       if(!symptoms.length) {
          throw ApiError.BadRequest('Чтобы получить консультацию, необходимо добавить симптомы')
       }
 
-      return await consultationModel.create({userId, symptoms})
+      const symptomsDto = symptoms.map(symptom => new SymptomDto(symptom))
+      const consultation = await ConsultationModel.create({userId, symptoms: symptomsDto, isDeleted: false})
+      
+      return new ConsultationDto(consultation)
    }
 
    async getConsultation(userId, query) {
 
-      const symptom = await consultationModel.find({userId, ...query})
+      const consultations = await ConsultationModel.find({userId, ...query, isDeleted: false})
 
-      if(!symptom) {
+      if(!consultations) {
          throw ApiError.BadRequest('Консультация не найдена')
       }
 
-      return symptom
+      const consultationsDto = consultations.map(consultation => new ConsultationDto(consultation)) 
+
+      return consultationsDto
    }
 
    async removeConsultation(userId, query) {
 
-      const isEmpty = isEmptyObj(query)
+      const consultations = await ConsultationModel.find({userId, ...query})
 
-      if(!isEmpty) {
-         await consultationModel.deleteOne({userId, ...query})
-         return {
-            deleteConsultation: true
-         }
+      if(!consultations.length) {
+         return {removedConsultation: false}
       }
-      else {
-         await consultationModel.deleteMany({userId})
-         return {
-            deleteAllConsultations: true
-         }
-      }
-   }  
 
+      for(const consultation of consultations) {
+         consultation.isDeleted = true
+         await consultation.save()
+      }
+
+      return {removedConsultation: true}
+   } 
 }
 
 export default new ConsultationService()

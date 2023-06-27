@@ -1,5 +1,5 @@
 import ApiError from "../exceptions/api-error.js"
-import { body } from 'express-validator'
+import { body, query } from 'express-validator'
 
 export const registerValidation = [
    
@@ -35,10 +35,42 @@ export function questionnaireValidation(req, res, next) {
 
 }
 
-export const symptomValidation = [
+export const symptomBodyValidation = [
    
-   body('localization').notEmpty(),
-   body('description').notEmpty(),
-   body('isActive').isBoolean()
+   body('localization').optional().notEmpty(),
+   body('description').optional().notEmpty()
    
+]
+
+export const symptomQueryValidation = [
+   
+   query('_id').optional().isLength({min: 24, max: 24}),
+   query('localization').optional().notEmpty().isString()
+   
+]
+
+export const consultationQueryValidation = [
+   
+   query('_id').optional().isLength({min: 24, max: 24}),
+   
+]
+
+export const createMessagebodyValidation = [
+   
+   body('message').optional().notEmpty(),
+   body('consultationId').notEmpty()
+   
+]
+
+export const messagesQueryValidation = [
+   
+   query('_id').optional().isLength({min: 24, max: 24}),
+   query('consultationId').optional().isLength({min: 24, max: 24})
+   
+]
+
+export const responseAiQueryValidation = [
+
+   query('consultationId').isLength({min: 24, max: 24})
+
 ]

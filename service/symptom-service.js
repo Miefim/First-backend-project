@@ -1,96 +1,58 @@
+import SymptomModel from "../models/symptom-model.js" 
 import ApiError from "../exceptions/api-error.js"
-import SymptomModel from "../models/symptom-model.js"
+import SymptomDto from "../dto/symptom-dto.js"
 
 class SymptomService {
 
-   async createSymptom(user, symptom) {
+   async createSymptom(userId, symptom) {
 
       const symptomData = await SymptomModel.create({
-         userId: user.id,
+         userId,
          ...symptom,
-         isActive: true
+         isDeleted: false
       })
 
-      return symptomData
+      const symptomDto = new SymptomDto(symptomData)
 
+      return symptomDto
    }
 
-   async getSymptom(user, symptomId) {
+   async getSymptom(userId, query) {
+      const symptoms = await SymptomModel.find({userId, ...query, isDeleted: false})
+      const symptomsDto = symptoms.map(symptom => new SymptomDto(symptom))
 
-      const symptom = await SymptomModel.findOne({_id: symptomId, userId: user.id})
-
-      if(!symptom) {
-         throw ApiError.BadRequest('Симптом не найден')
-      }
-
-      return symptom
-
+      return symptomsDto
    }  
 
-   async updateSymptom(user, symptomId, newSymptom) {
+   async updateSymptom(userId, _id, newSymptom) {
       
-      const symptom = await SymptomModel.findOne({_id: symptomId, userId: user.id})
+      const symptom = await SymptomModel.findOne({_id, userId})
 
       if(!symptom) {
          throw ApiError.BadRequest('Симптом не найден')
       }
 
-      const { localization, description, isActive } = newSymptom
-      
-      localization ? symptom.localization = localization : ''
-      description ? symptom.description = description : ''
-      isActive !== undefined ? symptom.isActive = isActive : ''
+      Object.keys(newSymptom).forEach(field => symptom[field] = newSymptom[field])
+      await symptom.save()
 
-      return await symptom.save()
-
+      return new SymptomDto(symptom)
    }
 
-   async removeSymptom(user, symptomId) {
+   async removeSymptom(userId, query) {
 
-      const symptom = await SymptomModel.findOne({_id: symptomId, userId: user.id})
+      const symptoms = await SymptomModel.find({userId, ...query})
 
-      if(!symptom) {
-         throw ApiError.BadRequest('Симптом не найден')
+      if(!symptoms.length) {
+         return {removeSymptom: false}
       }
 
-      await SymptomModel.deleteOne(symptom)
+      for(const symptom of symptoms) {
+         symptom.isDeleted = true
+         await symptom.save()
+      }
 
       return {removeSymptom: true}
-
    }
-
-   async getSymptoms(user, query) {
-
-      const { localization, active } = query
-
-      const params = {
-         userId: user.id
-      }
-
-      localization ? params.localization = localization : ''
-      active !== undefined ? params.isActive = active : ''
-
-      return await SymptomModel.find(params)
-
-   }
-
-   async removeSymptoms(user, query) {
-
-      const { localization, active } = query
-
-      const params = {
-         userId: user.id
-      }
-
-      localization ? params.localization = localization : ''
-      active !== undefined ? params.isActive = active : ''
-
-      await SymptomModel.deleteMany(params)
-
-      return {removeSymptoms: true}
-      
-   }
-
 }
 
 export default new SymptomService()
