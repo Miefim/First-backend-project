@@ -338,14 +338,14 @@
 #### response
 
     {
-      "_id": "649951e55183f0b4ccc1daed",
-      "userId": "645ced144bb108a56afb7321",
+      "_id": string,
+      "userId": string,
       "symptoms": [
          {
-            "_id": "64889049213450471d681d7a",
-            "userId": "645ced144bb108a56afb7321",
-            "localization": "Рука",
-            "description": "Постоянная боль в руке, что делать?"
+            "_id": string,
+            "userId": string,
+            "localization": string,
+            "description": string
          },
          ...
       ]
@@ -367,14 +367,14 @@
 
     [
       {
-         "_id": "649951e55183f0b4ccc1daed",
-         "userId": "645ced144bb108a56afb7321",
+         "_id": string,
+         "userId": string,
          "symptoms": [
             {
-               "_id": "64889049213450471d681d7a",
-               "userId": "645ced144bb108a56afb7321",
-               "localization": "Рука",
-               "description": "Постоянная боль в руке, что делать?",
+               "_id": string,
+               "userId": string,
+               "localization": string,
+               "description": string,
             },
             ...
          ]
